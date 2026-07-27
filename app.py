@@ -25,7 +25,7 @@ with st.form("activation_form", clear_on_submit=True):
         "on secure Canadian servers for the sole purpose of receiving emergency municipal vehicle blocking alerts."
     )
     
-    submit_button = st.form_submit_input("Activate Sticker Successfully")
+    submit_button = st.form_submit_button("Activate Sticker Successfully")
 
 if submit_button:
     if not token_id or not phone_number or not consent:
