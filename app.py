@@ -10,7 +10,7 @@ def init_supabase():
 
 supabase: Client = init_supabase()
 
-st.title("📱 Citizen Vehicle Alert Activation Hub")
+st.title("📱 Citizen Vehicle Alert Activation Hubba")
 st.write("Register your municipal QR sticker below to protect your vehicle from towing.")
 
 with st.form("activation_form", clear_on_submit=True):
