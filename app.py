@@ -32,16 +32,27 @@ if submit_button:
         st.error("❌ Error: All fields and the FOIPPA consent check are strictly required.")
     else:
         try:
-            # Update matching row in our Supabase engine
-            data, count = supabase.table("sticker_registry").update({
-                "citizen_phone": phone_number,
-                "license_plate": plate_number if plate_number else "NOT-PROVIDED",
-                "status": "Active"
-            }).eq("id", token_id).execute()
+            # 1. Direct Duplicate Verification Check
+            # Scan the table to see if this exact number is already claimed anywhere else
+            check_phone = supabase.table("sticker_registry").select("CITIZEN_PHONE").eq("CITIZEN_PHONE", phone_number).execute()
             
-            if len(data[1]) > 0:
-                st.success("🎉 Sticker Successfully Activated! You are now linked to the city grid.")
+            # If the database returns a matching record row, intercept it and block registration
+            if len(check_phone.data) > 0:
+                st.error("⚠️ This phone number is already registered to an active parking profile. Please input a unique number where you would like to receive notifications.")
+            
             else:
-                st.error("❌ Error: Invalid Serial Token ID. Please verify your sticker print.")
+                # 2. Proceed with Update only if the phone number is 100% unique
+                data = supabase.table("sticker_registry").update({
+                    "CITIZEN_PHONE": phone_number,
+                    "license_plate": plate_number if plate_number else "NOT-PROVIDED",
+                    "status": "Active"
+                }).eq("id", token_id).execute()
+                
+                # Verify that a row matching the serial token actually existed and changed
+                if len(data.data) > 0:
+                    st.success("🎉 Sticker Successfully Activated! You are now linked to the city grid.")
+                else:
+                    st.error("❌ Error: Invalid Serial Token ID. Please verify your sticker print.")
+                    
         except Exception as e:
             st.error(f"Database Communication Error: {str(e)}")
