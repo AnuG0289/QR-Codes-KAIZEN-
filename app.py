@@ -121,7 +121,7 @@ else:
                         "CITIZEN_PHONE": phone_number,
                         "LICENSE_PLATE": plate_number if plate_number else "NOT-PROVIDED",
                         "STATUS": "Active"
-                    }).eq("id", sanitized_token_id).execute()
+                    }).eq("ID", sanitized_token_id).execute()
                     
                     if len(data.data) > 0:
                         st.success(f"🎉 Sticker '{sanitized_token_id}' Successfully Activated! You are now linked to the city grid.")
