@@ -5,7 +5,7 @@ import requests
 # 1. Initialize Supabase Connection Safely via Streamlit Secrets
 @st.cache_resource
 def init_supabase():
-    url = st.secrets["https://zzgluhglmakdnhdgjlvi.supabase.co/rest/v1/"]
+    url = st.secrets["https://zzgluhglmakdnhdgjlvi.supabase.co"]
     key = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Z2x1aGdsbWFrZG5oZGdqbHZpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDkyNjc3MSwiZXhwIjoyMTAwNTAyNzcxfQ.cW56Xa4_HBcu7Ms0PK5BYuCpx9W_NFRNtcDSALD1ufQ"]
     return create_client(url, key)
 
