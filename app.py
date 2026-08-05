@@ -5,11 +5,9 @@ import requests
 # 1. Initialize Supabase Connection Safely via Streamlit Secrets
 @st.cache_resource
 def init_supabase():
-    # Use the labels/keys, NOT the actual URLs and tokens!
     url = st.secrets["SUPABASE_URL"]
     key = st.secrets["SUPABASE_KEY"]
     return create_client(url, key)
-
 
 supabase: Client = init_supabase()
 
@@ -21,12 +19,11 @@ if "authenticated" not in st.session_state:
 query_params = st.query_params
 
 # ==============================================================================
-# ROUTE A: THE OFFICER ENFORCEMENT VIEW (Triggered via Windshield QR Code #2)
-# URL Example: https://streamlit.app
+# ROUTE A: THE OFFICER ENFORCEMENT VIEW (Triggered via Windshield QR Code)
 # ==============================================================================
-if "serial" in query_params:
+if "ID" in query_params:
     # Force the URL input to be uppercase and stripped of accidental spaces
-    scanned_serial = query_params["serial"].upper().strip()
+    scanned_serial = query_params["ID"].upper().strip()
     
     st.title("🚓 Municipal Enforcement Action Suite")
     st.write(f"Target Vehicle Serial Token ID: **{scanned_serial}**")
@@ -38,7 +35,7 @@ if "serial" in query_params:
         
         officer_pin = st.text_input("Enter 4-Digit Officer PIN:", type="password")
         if st.button("Verify Credentials"):
-            if officer_pin == "0357": # 🔴 RE-PLACE WITH YOUR DESIRED PIN
+            if officer_pin == "0357": 
                 st.session_state["authenticated"] = True
                 st.rerun()
             else:
@@ -53,45 +50,50 @@ if "serial" in query_params:
         
         if len(vehicle_lookup.data) > 0:
             record = vehicle_lookup.data[0]
-            st.write(f"**License Plate:** {record.get('LICENSE_PLATE', 'N/A')}")
-            st.write(f"**Registry Status:** {record.get('STATUS', 'N/A')}")
+            
+            # Safely support both uppercase and lowercase column lookups from database
+            license_plate = record.get("LICENSE_PLATE") or record.get("license_plate") or "N/A"
+            registry_status = record.get("STATUS") or record.get("status") or "N/A"
+            phone = record.get("CITIZEN_PHONE") or record.get("citizen_phone")
+            
+            st.write(f"**License Plate:** {license_plate}")
+            st.write(f"**Registry Status:** {registry_status}")
             
             st.markdown("---")
             st.warning("⚠️ Pressing the button below will instantly alert the citizen via an automated interactive voice response phone call.")
             
             # The Secure Production Button
-           if st.button("🚨 Dispatch Emergency Notification Call", use_container_width=True):
+            if st.button("🚨 Dispatch Emergency Notification Call", use_container_width=True):
                 with st.spinner("Communicating with telecom networks..."):
                     try:
                         make_webhook_url = "https://make.com"
                         
-                        # Print the record keys to the Streamlit page so you can see if they are uppercase or lowercase
+                        # Print database keys to the UI so we can debug structure live
                         st.write("Debug - Data keys inside record are:", list(record.keys()))
-                        
-                        # Safely fetch the phone number regardless of whether it is uppercase or lowercase
-                        phone = record.get("CITIZEN_PHONE") or record.get("citizen_phone")
+                        st.write(f"Debug - Phone targeted: {phone}")
                         
                         payload = {
                             "CITIZEN_PHONE": phone,
-                            "API_KEY": "MuniSecurePass2026!xY"
+                            "API_KEY": "MuniSecurePass2026!xY" 
                         }
                         
                         response = requests.post(make_webhook_url, json=payload)
                         
-                        # Print out what Make.com explicitly responded with
+                        # Print what Make.com explicitly responded with
                         st.write(f"Debug - Make.com Status Code: {response.status_code}")
                         st.write(f"Debug - Make.com Raw Response: {response.text}")
                         
                         if response.status_code == 200 or response.text.lower() == "accepted":
-                            st.success("🎉 Notification dispatch successfully initiated!")
+                            st.success("🎉 Notification dispatch successfully initiated! Citizen's line is ringing.")
                         else:
                             st.error(f"Network Handshake Failed: {response.text}")
                     except Exception as call_err:
-                        # This will print the EXACT Python error stack trace to your screen
-                        st.exception(call_err) 
+                        st.exception(call_err)
+        else:
+            st.error(f"❌ System Error: Token ID '{scanned_serial}' does not exist in the municipal asset registry.")
+
 # ==============================================================================
-# ROUTE B: THE CITIZEN REGISTRATION VIEW (Triggered via Registration Sheet QR Code #1)
-# URL Example: https://streamlit.app
+# ROUTE B: THE CITIZEN REGISTRATION VIEW (Triggered via Registration Sheet)
 # ==============================================================================
 else:
     st.title("📱 Citizen Vehicle Alert Activation Hub")
@@ -113,7 +115,6 @@ else:
         if not token_id or not phone_number or not consent:
             st.error("❌ Error: All fields and the FOIPPA consent check are strictly required.")
         else:
-            # 🌟 Sanitization: Strip spaces and force citizen input to UPPERCASE
             sanitized_token_id = token_id.upper().strip()
             
             try:
@@ -121,7 +122,7 @@ else:
                 check_phone = supabase.table("sticker_registry").select("CITIZEN_PHONE").eq("CITIZEN_PHONE", phone_number).execute()
                 
                 if len(check_phone.data) > 0:
-                    st.error("⚠️ This phone number is already registered to an active parking profile. Please input a unique number where you would like to receive notifications.")
+                    st.error("⚠️ This phone number is already registered to an active parking profile. Please input a unique number.")
                 else:
                     # 2. Safe registration update using the sanitized uppercase token
                     data = supabase.table("sticker_registry").update({
