@@ -6,7 +6,7 @@ import requests
 @st.cache_resource
 def init_supabase():
     url = st.secrets["https://zzgluhglmakdnhdgjlvi.supabase.co/rest/v1/"]
-    key = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Z2x1aGdsbWFrZG5oZGdqbHZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MjY3NzEsImV4cCI6MjEwMDUwMjc3MX0.gQByGc7u8mk9JAkq7RW6fKJm9ueckihbO2F2KGppfNk"]
+    key = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Z2x1aGdsbWFrZG5oZGdqbHZpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDkyNjc3MSwiZXhwIjoyMTAwNTAyNzcxfQ.cW56Xa4_HBcu7Ms0PK5BYuCpx9W_NFRNtcDSALD1ufQ"]
     return create_client(url, key)
 
 supabase: Client = init_supabase()
