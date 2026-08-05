@@ -60,36 +60,35 @@ if "serial" in query_params:
             st.warning("⚠️ Pressing the button below will instantly alert the citizen via an automated interactive voice response phone call.")
             
             # The Secure Production Button
-            if st.button("🚨 Dispatch Emergency Notification Call", use_container_width=True):
-    with st.spinner("Communicating with telecom networks..."):
-        try:
-            make_webhook_url = "https://make.com"
-            
-            # Print the record keys to the Streamlit page so you can see if they are uppercase or lowercase
-            st.write("Debug - Data keys inside record are:", list(record.keys()))
-            
-            # Safely fetch the phone number regardless of whether it is uppercase or lowercase
-            phone = record.get("CITIZEN_PHONE") or record.get("citizen_phone")
-            
-            payload = {
-                "CITIZEN_PHONE": phone,
-                "API_KEY": "MuniSecurePass2026!xY"
-            }
-            
-            response = requests.post(make_webhook_url, json=payload)
-            
-            # Print out what Make.com explicitly responded with
-            st.write(f"Debug - Make.com Status Code: {response.status_code}")
-            st.write(f"Debug - Make.com Raw Response: {response.text}")
-            
-            if response.status_code == 200 or response.text.lower() == "accepted":
-                st.success("🎉 Notification dispatch successfully initiated!")
-            else:
-                st.error(f"Network Handshake Failed: {response.text}")
-        except Exception as call_err:
-            # This will print the EXACT Python error stack trace to your screen
-            st.exception(call_err)
-
+           if st.button("🚨 Dispatch Emergency Notification Call", use_container_width=True):
+                with st.spinner("Communicating with telecom networks..."):
+                    try:
+                        make_webhook_url = "https://make.com"
+                        
+                        # Print the record keys to the Streamlit page so you can see if they are uppercase or lowercase
+                        st.write("Debug - Data keys inside record are:", list(record.keys()))
+                        
+                        # Safely fetch the phone number regardless of whether it is uppercase or lowercase
+                        phone = record.get("CITIZEN_PHONE") or record.get("citizen_phone")
+                        
+                        payload = {
+                            "CITIZEN_PHONE": phone,
+                            "API_KEY": "MuniSecurePass2026!xY"
+                        }
+                        
+                        response = requests.post(make_webhook_url, json=payload)
+                        
+                        # Print out what Make.com explicitly responded with
+                        st.write(f"Debug - Make.com Status Code: {response.status_code}")
+                        st.write(f"Debug - Make.com Raw Response: {response.text}")
+                        
+                        if response.status_code == 200 or response.text.lower() == "accepted":
+                            st.success("🎉 Notification dispatch successfully initiated!")
+                        else:
+                            st.error(f"Network Handshake Failed: {response.text}")
+                    except Exception as call_err:
+                        # This will print the EXACT Python error stack trace to your screen
+                        st.exception(call_err) 
 # ==============================================================================
 # ROUTE B: THE CITIZEN REGISTRATION VIEW (Triggered via Registration Sheet QR Code #1)
 # URL Example: https://streamlit.app
