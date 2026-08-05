@@ -49,12 +49,12 @@ if "serial" in query_params:
         st.success("✅ Authorized Officer Status Active")
         
         # Look up the vehicle record in Supabase using the sanitized uppercase serial ID
-        vehicle_lookup = supabase.table("sticker_registry").select("CITIZEN_PHONE", "license_plate", "status").eq("id", scanned_serial).execute()
+        vehicle_lookup = supabase.table("sticker_registry").select("CITIZEN_PHONE", "LICENSE_PLATE", "STATUS").eq("ID", scanned_serial).execute()
         
         if len(vehicle_lookup.data) > 0:
             record = vehicle_lookup.data[0]
-            st.write(f"**License Plate:** {record.get('license_plate', 'N/A')}")
-            st.write(f"**Registry Status:** {record.get('status', 'N/A')}")
+            st.write(f"**License Plate:** {record.get('LICENSE_PLATE', 'N/A')}")
+            st.write(f"**Registry Status:** {record.get('STATUS', 'N/A')}")
             
             st.markdown("---")
             st.warning("⚠️ Pressing the button below will instantly alert the citizen via an automated interactive voice response phone call.")
@@ -119,8 +119,8 @@ else:
                     # 2. Safe registration update using the sanitized uppercase token
                     data = supabase.table("sticker_registry").update({
                         "CITIZEN_PHONE": phone_number,
-                        "license_plate": plate_number if plate_number else "NOT-PROVIDED",
-                        "status": "Active"
+                        "LICENSE_PLATE": plate_number if plate_number else "NOT-PROVIDED",
+                        "STATUS": "Active"
                     }).eq("id", sanitized_token_id).execute()
                     
                     if len(data.data) > 0:
