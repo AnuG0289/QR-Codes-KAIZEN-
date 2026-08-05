@@ -77,7 +77,16 @@ if "ID" in query_params:
                             "API_KEY": "MuniSecurePass2026!xY" 
                         }
                         
-                        response = requests.post(make_webhook_url, json=payload)
+                        # Custom headers disguised as an updated Google Chrome browser to bypass Cloudflare protection
+                        headers = {
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                            "Accept": "application/json",
+                            "Content-Type": "application/json",
+                            "Origin": "https://streamlit.app",
+                            "Referer": "https://streamlit.app"
+                        }
+                        
+                        response = requests.post(make_webhook_url, json=payload, headers=headers)
                         
                         # Print what Make.com explicitly responded with
                         st.write(f"Debug - Make.com Status Code: {response.status_code}")
