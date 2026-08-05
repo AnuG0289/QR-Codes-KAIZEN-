@@ -1,6 +1,5 @@
 import streamlit as st
 from supabase import create_client, Client
-import requests
 
 # 1. Initialize Supabase Connection Safely via Streamlit Secrets
 @st.cache_resource
@@ -60,44 +59,31 @@ if "ID" in query_params:
             st.write(f"**Registry Status:** {registry_status}")
             
             st.markdown("---")
-            st.warning("⚠️ Pressing the button below will instantly alert the citizen via an automated interactive voice response phone call.")
+            st.warning("⚠️ Pressing the button below will open a gateway to instantly alert the citizen via an automated voice response phone call.")
             
-            # The Secure Production Button
-            if st.button("🚨 Dispatch Emergency Notification Call", use_container_width=True):
-                with st.spinner("Communicating with telecom networks..."):
-                    try:
-                        make_webhook_url = "https://make.com"
-                        
-                        # Print database keys to the UI so we can debug structure live
-                        st.write("Debug - Data keys inside record are:", list(record.keys()))
-                        st.write(f"Debug - Phone targeted: {phone}")
-                        
-                        payload = {
-                            "CITIZEN_PHONE": phone,
-                            "API_KEY": "MuniSecurePass2026!xY" 
-                        }
-                        
-                        # Custom headers disguised as an updated Google Chrome browser to bypass Cloudflare protection
-                        headers = {
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-                            "Accept": "application/json",
-                            "Content-Type": "application/json",
-                            "Origin": "https://streamlit.app",
-                            "Referer": "https://streamlit.app"
-                        }
-                        
-                        response = requests.post(make_webhook_url, json=payload, headers=headers)
-                        
-                        # Print what Make.com explicitly responded with
-                        st.write(f"Debug - Make.com Status Code: {response.status_code}")
-                        st.write(f"Debug - Make.com Raw Response: {response.text}")
-                        
-                        if response.status_code == 200 or response.text.lower() == "accepted":
-                            st.success("🎉 Notification dispatch successfully initiated! Citizen's line is ringing.")
-                        else:
-                            st.error(f"Network Handshake Failed: {response.text}")
-                    except Exception as call_err:
-                        st.exception(call_err)
+            # Formatted HTML code payload to run entirely on the Officer's local mobile device browser
+            html_button = f"""
+            <form action="https://make.com" method="POST" target="_blank" style="margin:0;padding:0;">
+                <input type="hidden" name="CITIZEN_PHONE" value="{phone}">
+                <input type="hidden" name="API_KEY" value="MuniSecurePass2026!xY">
+                <button type="submit" style="
+                    width: 100%;
+                    background-color: #FF4B4B;
+                    color: white;
+                    border: none;
+                    padding: 14px 20px;
+                    font-size: 16px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+                ">🚨 Dispatch Emergency Notification Call</button>
+            </form>
+            """
+            
+            # Render the secure button on the page using a native iframe component
+            st.components.v1.html(html_button, height=60)
+            
         else:
             st.error(f"❌ System Error: Token ID '{scanned_serial}' does not exist in the municipal asset registry.")
 
