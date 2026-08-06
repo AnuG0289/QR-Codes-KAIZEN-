@@ -59,7 +59,7 @@ if "ID" in query_params:
             st.write(f"**Registry Status:** {registry_status}")
             
             st.markdown("---")
-            st.warning("⚠️ Pressing the button below will instantly alert the citizen via an automated voice response phone call.")
+            st.warning("⚠️ Pressing the button below will open a gateway to instantly alert the citizen via an automated voice response phone call.")
             
             # Formatted HTML code payload to run entirely on the Officer's local mobile device browser
             html_button = f"""
@@ -108,28 +108,46 @@ else:
 
     if submit_button:
         if not token_id or not phone_number or not consent:
-            st.error("❌ Error:Serila Token ID and unique mobile number, and the FOIPPA consent check are strictly required.")
+            st.error("❌ Error: Serial Token ID and unique mobile number, and the FOIPPA consent check are strictly required.")
         else:
             sanitized_token_id = token_id.upper().strip()
             
-            try:
-                # 1. Pre-registration unique phone check
-                check_phone = supabase.table("sticker_registry").select("CITIZEN_PHONE").eq("CITIZEN_PHONE", phone_number).execute()
-                
-                if len(check_phone.data) > 0:
-                    st.error("⚠️ This phone number is already registered to an active parking profile. Please input a unique number.")
-                else:
-                    # 2. Safe registration update using the sanitized uppercase token
-                    data = supabase.table("sticker_registry").update({
-                        "CITIZEN_PHONE": phone_number,
-                        "LICENSE_PLATE": plate_number if plate_number else "NOT-PROVIDED",
-                        "STATUS": "Active"
-                    }).eq("ID", sanitized_token_id).execute()
+            # 🌟 Phone Number Cleansing Engine
+            # Keep only numeric digits from what the user typed
+            digits_only = "".join(char for char in phone_number if char.isdigit())
+            
+            # Formulate the E.164 standard formatting (+1 followed by 10 digits)
+            if len(digits_only) == 10:
+                # User left off country code (e.g. 9053257684) -> add it
+                sanitized_phone = f"+1{digits_only}"
+            elif len(digits_only) == 11 and digits_only.startswith("1"):
+                # User included country code 1 (e.g. 19053257684) -> append plus sign
+                sanitized_phone = f"+{digits_only}"
+            else:
+                # Catch invalid phone lengths before sending to database
+                sanitized_phone = None
+
+            if not sanitized_phone:
+                st.error("❌ Error: Please enter a valid 10-digit North American phone number.")
+            else:
+                try:
+                    # 1. Pre-registration unique phone check using our newly standardized format
+                    check_phone = supabase.table("sticker_registry").select("CITIZEN_PHONE").eq("CITIZEN_PHONE", sanitized_phone).execute()
                     
-                    if len(data.data) > 0:
-                        st.success(f"🎉 Sticker '{sanitized_token_id}' Successfully Activated! You are now linked to the city grid.")
+                    if len(check_phone.data) > 0:
+                        st.error("⚠️ This phone number is already registered to an active parking profile. Please input a unique number.")
                     else:
-                        st.error(f"❌ Error: Serial Token ID '{sanitized_token_id}' does not exist in the pre-loaded inventory database.")
+                        # 2. Safe registration update using the standardized phone and uppercase token
+                        data = supabase.table("sticker_registry").update({
+                            "CITIZEN_PHONE": sanitized_phone,
+                            "LICENSE_PLATE": plate_number.upper().strip() if plate_number else "NOT-PROVIDED",
+                            "STATUS": "Active"
+                        }).eq("ID", sanitized_token_id).execute()
                         
-            except Exception as e:
-                st.error(f"Database Communication Error: {str(e)}")
+                        if len(data.data) > 0:
+                            st.success(f"🎉 Sticker '{sanitized_token_id}' Successfully Activated with phone {sanitized_phone}! You are now linked to the city grid.")
+                        else:
+                            st.error(f"❌ Error: Serial Token ID '{sanitized_token_id}' does not exist in the pre-loaded inventory database.")
+                            
+                except Exception as e:
+                    st.error(f"Database Communication Error: {str(e)}")
