@@ -59,11 +59,11 @@ if "ID" in query_params:
             st.write(f"**Registry Status:** {registry_status}")
             
             st.markdown("---")
-            st.warning("⚠️ Pressing the button below will open a gateway to instantly alert the citizen via an automated voice response phone call.")
+            st.warning("⚠️ Pressing the button below will instantly alert the citizen via an automated voice response phone call.")
             
             # Formatted HTML code payload to run entirely on the Officer's local mobile device browser
             html_button = f"""
-            <form action="https://make.com" method="POST" target="_blank" style="margin:0;padding:0;">
+            <form action="https://hook.us2.make.com/vjxo5n1cvabukj7mwoh73ggfhfwvgvpy" method="POST" target="_blank" style="margin:0;padding:0;">
                 <input type="hidden" name="CITIZEN_PHONE" value="{phone}">
                 <input type="hidden" name="API_KEY" value="MuniSecurePass2026!xY">
                 <button type="submit" style="
@@ -92,7 +92,7 @@ if "ID" in query_params:
 # ==============================================================================
 else:
     st.title("📱 Citizen Vehicle Alert Activation Hub")
-    st.write("Register your municipal QR sticker below to protect your vehicle from towing.")
+    st.write("Register your municipal QR sticker below to protect your vehicle from being fined or towing.")
 
     with st.form("activation_form", clear_on_submit=True):
         token_id = st.text_input("Enter the Serial Token ID (Printed on your sticker label)")
@@ -108,7 +108,7 @@ else:
 
     if submit_button:
         if not token_id or not phone_number or not consent:
-            st.error("❌ Error: All fields and the FOIPPA consent check are strictly required.")
+            st.error("❌ Error:Serila Token ID and unique mobile number, and the FOIPPA consent check are strictly required.")
         else:
             sanitized_token_id = token_id.upper().strip()
             
