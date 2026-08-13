@@ -48,6 +48,7 @@ if "ID" in query_params:
         vehicle_lookup = supabase.table("sticker_registry").select("CITIZEN_PHONE", "LICENSE_PLATE", "STATUS").eq("ID", scanned_serial).execute()
         
         if len(vehicle_lookup.data) > 0:
+            # Safely grab the first element from the data list
             record = vehicle_lookup.data[0]
             
             # Safely support both uppercase and lowercase column lookups from database
@@ -150,5 +151,5 @@ else:
                         else:
                             st.error(f"❌ Error: Serial Token ID '{sanitized_token_id}' does not exist in the pre-loaded inventory database.")
                         
-            except Exception as e:
-                st.error(f"Database Communication Error: {str(e)}")
+                except Exception as e:
+                    st.error(f"Database Communication Error: {str(e)}")
