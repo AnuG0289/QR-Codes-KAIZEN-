@@ -63,8 +63,9 @@ if "ID" in query_params:
             
             # Formatted HTML code payload to run entirely on the Officer's local mobile device browser
             html_button = f"""
-            <form action="https://hook.us2.make.com/vjxo5n1cvabukj7mwoh73ggfhfwvgvpy" method="POST" target="_blank" style="margin:0;padding:0;">
+            <form action="https://make.com" method="POST" target="_blank" style="margin:0;padding:0;">
                 <input type="hidden" name="CITIZEN_PHONE" value="{phone}">
+                <input type="hidden" name="STICKER_ID" value="{scanned_serial}">
                 <input type="hidden" name="API_KEY" value="MuniSecurePass2026!xY">
                 <button type="submit" style="
                     width: 100%;
@@ -148,6 +149,6 @@ else:
                             st.success(f"🎉 Sticker '{sanitized_token_id}' Successfully Activated with phone {sanitized_phone}! You are now linked to the city grid.")
                         else:
                             st.error(f"❌ Error: Serial Token ID '{sanitized_token_id}' does not exist in the pre-loaded inventory database.")
-                            
-                except Exception as e:
-                    st.error(f"Database Communication Error: {str(e)}")
+                        
+            except Exception as e:
+                st.error(f"Database Communication Error: {str(e)}")
