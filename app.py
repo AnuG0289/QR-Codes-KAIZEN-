@@ -21,8 +21,11 @@ query_params = st.query_params
 # ROUTE A: THE OFFICER ENFORCEMENT VIEW (Triggered via Windshield QR Code)
 # ==============================================================================
 if "ID" in query_params:
-    # Force the URL input to be uppercase and stripped of accidental spaces
-    scanned_serial = query_params["ID"].upper().strip()
+    # 🌟 LOCK ID INTO SESSION VAULT: Prevents data loss when the webpage reloads during PIN entry
+    if "scanned_id" not in st.session_state:
+        st.session_state["scanned_id"] = query_params["ID"].upper().strip()
+        
+    scanned_serial = st.session_state["scanned_id"]
     
     st.title("🚓 Municipal Enforcement Action Suite")
     st.write(f"Target Vehicle Serial Token ID: **{scanned_serial}**")
@@ -62,11 +65,11 @@ if "ID" in query_params:
             st.markdown("---")
             st.warning("⚠️ Pressing the button below will open a gateway to instantly alert the citizen via an automated voice response phone call.")
             
-            # Formatted HTML code payload to run entirely on the Officer's local mobile device browser
+            # Formatted HTML code payload using the locked persistent session state variables
             html_button = f"""
-            <form action="https://hook.us2.make.com/vjxo5n1cvabukj7mwoh73ggfhfwvgvpy" method="POST" target="_blank" style="margin:0;padding:0;">
+            <form action="https://make.com" method="POST" target="_blank" style="margin:0;padding:0;">
                 <input type="hidden" name="CITIZEN_PHONE" value="{phone}">
-                <input type="hidden" name="ID" value="{scanned_serial}">
+                <input type="hidden" name="ID" value="{st.session_state['scanned_id']}">
                 <input type="hidden" name="API_KEY" value="MuniSecurePass2026!xY">
                 <button type="submit" style="
                     width: 100%;
@@ -115,31 +118,24 @@ else:
             sanitized_token_id = token_id.upper().strip()
             
             # 🌟 Phone Number Cleansing Engine
-            # Keep only numeric digits from what the user typed
             digits_only = "".join(char for char in phone_number if char.isdigit())
             
-            # Formulate the E.164 standard formatting (+1 followed by 10 digits)
             if len(digits_only) == 10:
-                # User left off country code (e.g. 9053257684) -> add it
                 sanitized_phone = f"+1{digits_only}"
             elif len(digits_only) == 11 and digits_only.startswith("1"):
-                # User included country code 1 (e.g. 19053257684) -> append plus sign
                 sanitized_phone = f"+{digits_only}"
             else:
-                # Catch invalid phone lengths before sending to database
                 sanitized_phone = None
 
             if not sanitized_phone:
                 st.error("❌ Error: Please enter a valid 10-digit North American phone number.")
             else:
                 try:
-                    # 1. Pre-registration unique phone check using our newly standardized format
                     check_phone = supabase.table("sticker_registry").select("CITIZEN_PHONE").eq("CITIZEN_PHONE", sanitized_phone).execute()
                     
                     if len(check_phone.data) > 0:
                         st.error("⚠️ This phone number is already registered to an active parking profile. Please input a unique number.")
                     else:
-                        # 2. Safe registration update using the standardized phone and uppercase token
                         data = supabase.table("sticker_registry").update({
                             "CITIZEN_PHONE": sanitized_phone,
                             "LICENSE_PLATE": plate_number.upper().strip() if plate_number else "NOT-PROVIDED",
@@ -159,16 +155,9 @@ else:
 # ==============================================================================
 st.markdown("---")
 st.subheader("⚙️ System Diagnostic Live Inspector")
-
 try:
-    # Safely perform an unfiltered select query
     debug_dump = supabase.table("sticker_registry").select("*").execute()
-    
     if debug_dump.data:
-        st.write("Below is the exact raw data structure stored inside your Supabase table rows:")
         st.json(debug_dump.data)
-    else:
-        st.warning("⚠️ Connected to Supabase, but the 'sticker_registry' table appears completely empty.")
-        
 except Exception as debug_err:
     st.error(f"Diagnostic Engine Failure: {str(debug_err)}")
