@@ -21,7 +21,7 @@ query_params = st.query_params
 # ROUTE A: THE OFFICER ENFORCEMENT VIEW (Triggered via Windshield QR Code)
 # ==============================================================================
 if "ID" in query_params:
-    # 🌟 LOCK ID INTO SESSION VAULT: Prevents data loss when the webpage reloads during PIN entry
+    # LOCK ID INTO SESSION VAULT: Prevents data loss when the webpage reloads during PIN entry
     if "scanned_id" not in st.session_state:
         st.session_state["scanned_id"] = query_params["ID"].upper().strip()
         
@@ -51,7 +51,7 @@ if "ID" in query_params:
         vehicle_lookup = supabase.table("sticker_registry").select("CITIZEN_PHONE", "LICENSE_PLATE", "STATUS").eq("ID", scanned_serial).execute()
         
         if len(vehicle_lookup.data) > 0:
-            # Safely grab the first element from the data list
+            # 🌟 FIX: Grab the first element dictionary cleanly from the data list array
             record = vehicle_lookup.data[0]
             
             # Safely support both uppercase and lowercase column lookups from database
@@ -117,7 +117,7 @@ else:
         else:
             sanitized_token_id = token_id.upper().strip()
             
-            # 🌟 Phone Number Cleansing Engine
+            # Phone Number Cleansing Engine
             digits_only = "".join(char for char in phone_number if char.isdigit())
             
             if len(digits_only) == 10:
@@ -151,7 +151,7 @@ else:
                     st.error(f"Database Communication Error: {str(e)}")
 
 # ==============================================================================
-# 🛠️ TEMPORARY MUNICIPAL DATA INSPECTOR MODULE (DELETE BEFORE PRODUCTION)
+# TEMPORARY MUNICIPAL DATA INSPECTOR MODULE (DELETE BEFORE PRODUCTION)
 # ==============================================================================
 st.markdown("---")
 st.subheader("⚙️ System Diagnostic Live Inspector")
@@ -161,3 +161,4 @@ try:
         st.json(debug_dump.data)
 except Exception as debug_err:
     st.error(f"Diagnostic Engine Failure: {str(debug_err)}")
+
