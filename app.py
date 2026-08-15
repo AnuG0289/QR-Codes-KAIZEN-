@@ -153,3 +153,22 @@ else:
                         
                 except Exception as e:
                     st.error(f"Database Communication Error: {str(e)}")
+
+# ==============================================================================
+# 🛠️ TEMPORARY MUNICIPAL DATA INSPECTOR MODULE (DELETE BEFORE PRODUCTION)
+# ==============================================================================
+st.markdown("---")
+st.subheader("⚙️ System Diagnostic Live Inspector")
+
+try:
+    # Safely perform an unfiltered select query
+    debug_dump = supabase.table("sticker_registry").select("*").execute()
+    
+    if debug_dump.data:
+        st.write("Below is the exact raw data structure stored inside your Supabase table rows:")
+        st.json(debug_dump.data)
+    else:
+        st.warning("⚠️ Connected to Supabase, but the 'sticker_registry' table appears completely empty.")
+        
+except Exception as debug_err:
+    st.error(f"Diagnostic Engine Failure: {str(debug_err)}")
